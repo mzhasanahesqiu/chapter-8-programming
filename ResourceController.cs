@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ResourceController : MonoBehaviour
@@ -17,108 +17,106 @@ public class ResourceController : MonoBehaviour
         set
         {
             UserDataManager.Progress.ResourcesLevels[_index] = value;
-            UserDataManager.Save(true);
+            UserDataManager.Save ();
         }
 
         get
         {
-            if (!UserDataManager.HasResources(_index))
+            if (!UserDataManager.HasResources (_index))
             {
                 return 1;
             }
-            
+
             return UserDataManager.Progress.ResourcesLevels[_index];
         }
     }
 
     public bool IsUnlocked { get; private set; }
 
-    private void Start()
+    private void Start ()
     {
-        ResourceButton.onClick.AddListener(() =>
+        ResourceButton.onClick.AddListener (() =>
         {
             if (IsUnlocked)
             {
-                UpgradeLevel();
+                UpgradeLevel ();
             }
             else
             {
-                UnlockResource();
+                UnlockResource ();
             }
         });
     }
 
-    public void SetConfig(int index, ResourceConfig config)
+    public void SetConfig (int index, ResourceConfig config)
     {
         _index = index;
         _config = config;
-        
-        ResourceDescription.text = $"{ _config.Name } Lv. { _level }\n+{ GetOutput().ToString("0") }";
-        ResourceUnlockCost.text = $"Unlock Cost\n{ _config.UnlockCost }";
-        ResourceUpgradeCost.text = $"Upgrade Cost\n{ GetUpgradeCost() }";
 
-        SetUnlocked(_config.UnlockCost == 0 || UserDataManager.HasResources(_index));
+        ResourceDescription.text = $"{ _config.Name } Lv. { _level }\n+{ GetOutput ().ToString ("0") }";
+        ResourceUnlockCost.text = $"Unlock Cost\n{ _config.UnlockCost }";
+        ResourceUpgradeCost.text = $"Upgrade Cost\n{ GetUpgradeCost () }";
+
+        SetUnlocked (_config.UnlockCost == 0 || UserDataManager.HasResources (_index));
     }
 
-    public double GetOutput()
+    public double GetOutput ()
     {
         return _config.Output * _level;
     }
 
-    public double GetUpgradeCost()
+    public double GetUpgradeCost ()
     {
         return _config.UpgradeCost * _level;
     }
 
-    public double GetUnlockCost()
+    public double GetUnlockCost ()
     {
         return _config.UnlockCost;
     }
 
-    public void UpgradeLevel()
+    public void UpgradeLevel ()
     {
-        double upgradeCost = GetUpgradeCost();
+        double upgradeCost = GetUpgradeCost ();
         if (UserDataManager.Progress.Gold < upgradeCost)
         {
             return;
         }
 
-        GameManager.Instance.AddGold(-upgradeCost);
+        GameManager.Instance.AddGold (-upgradeCost);
         _level++;
 
-        ResourceUpgradeCost.text = $"Upgrade Cost\n{ GetUpgradeCost() }";
-        ResourceDescription.text = $"{ _config.Name } Lv. { _level }\n+{ GetOutput().ToString("0") }";
-        AnalyticsManager.LogUpgradeEvent(_index, _level);
+        ResourceUpgradeCost.text = $"Upgrade Cost\n{ GetUpgradeCost () }";
+        ResourceDescription.text = $"{ _config.Name } Lv. { _level }\n+{ GetOutput ().ToString ("0") }";
     }
 
-    public void UnlockResource()
+    public void UnlockResource ()
     {
-        double unlockCost = GetUnlockCost();
+        double unlockCost = GetUnlockCost ();
         if (UserDataManager.Progress.Gold < unlockCost)
         {
             return;
         }
 
-        SetUnlocked(true);
-        GameManager.Instance.ShowNextResource();
-        AchievementController.Instance.UnlockAchievement(AchievementType.UnlockResource, _config.Name);
-        AnalyticsManager.LogUnlockEvent(_index);
+        SetUnlocked (true);
+        GameManager.Instance.ShowNextResource ();
+        AchievementController.Instance.UnlockAchievement (AchievementType.UnlockResource, _config.Name);
     }
 
-    public void SetUnlocked(bool unlocked)
+    public void SetUnlocked (bool unlocked)
     {
         IsUnlocked = unlocked;
         if (unlocked)
         {
-            if (!UserDataManager.HasResources(_index))
+            if (!UserDataManager.HasResources (_index))
             {
-                UserDataManager.Progress.ResourcesLevels.Add(_level);
-                UserDataManager.Save(true);
+                UserDataManager.Progress.ResourcesLevels.Add (_level);
+                UserDataManager.Save ();
             }
         }
 
         ResourceImage.color = IsUnlocked ? Color.white : Color.grey;
-        ResourceUnlockCost.gameObject.SetActive(!unlocked);
-        ResourceUpgradeCost.gameObject.SetActive(unlocked);
+        ResourceUnlockCost.gameObject.SetActive (!unlocked);
+        ResourceUpgradeCost.gameObject.SetActive (unlocked);
     }
 }
